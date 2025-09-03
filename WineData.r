@@ -78,27 +78,63 @@ datawineNA <- datawine
 datawineNA$alcohol[rbinom(N, 1, 0.1) == 1] <- NA
 datawineNA$fenol[rbinom(N, 1, 0.1) == 1] <- NA
 summary(datawineNA)
+View(datawineNA)
 
+#Eliminando registros con NA
+datawine1 <- datawineNA[rowSums(is.na(datawineNA)) == 0,]
+summary(datawine1)
+print(dim(datawine1))
+View(datawine1)
 
+#Imputacion con valor de la media
+datawine2 <- datawineNA
+meanAlch <- mean(datawine1$alcohol)
+meanFenol <- mean(datawine1$fenol)
+meanAlch <- mean(datawineNA$alcohol, na.rm = TRUE)
+meanFenol <- mean(datawineNA$fenol, na.rm = TRUE)
+datawine2$alcohol[is.na(datawineNA$alcohol)] <- meanAlch
+datawine2$fenol[is.na(datawineNA$fenol)] <- meanFenol
+summary(datawine2)
+View(datawine2)
 
+#Imputacion con valor de la media condicionada
+datawine3 <- datawineNA
+View(datawine3)
+indClase1 <- which(datawine1$clase==1)
+meanAlchC1 <- mean(datawine1$alcohol[datawine1$clase==1])
+meanAlchC2 <- mean(datawine1$alcohol[datawine1$clase==2])
+meanAlchC3 <- mean(datawine1$alcohol[datawine1$clase==3])
+meanFenolC1 <- mean(datawine1$fenol[datawine1$clase==1])
+meanFenolC2 <- mean(datawine1$fenol[datawine1$clase==2])
+meanFenolC3 <- mean(datawine1$fenol[datawine1$clase==3])
 
+datawine3$alcohol[is.na(datawineNA$alcohol) & datawineNA$clase==1] <- meanAlchC1
+datawine3$alcohol[is.na(datawineNA$alcohol) & datawineNA$clase==2] <- meanAlchC2
+datawine3$alcohol[is.na(datawineNA$alcohol) & datawineNA$clase==3] <- meanAlchC3
 
-#nuevo conjunto de datos discretizados
-datawineDis1 <- datawine
+datawine3$fenol[is.na(datawineNA$fenol) & datawineNA$clase==1] <- meanFenolC1
+datawine3$fenol[is.na(datawineNA$fenol) & datawineNA$clase==2] <- meanFenolC2
+datawine3$fenol[is.na(datawineNA$fenol) & datawineNA$clase==3] <- meanFenolC3
 
-#Columna de datos por amplitud
-dataCol <- datawine$alcohol
+summary(datawine3)
+View(datawine3)
 
-#Discretizacion por amplitud
-T<-5
-maxCol <- max(dataCol)
-minCol <- min(dataCol)
-w <- (maxCol - minCol)
-cat("Maximo: ", maxCol)
-cat("Minimo: ", minCol)
-
-
-
+#discretizacion igual amplitud T = 3
+T <- 3
+datawine4 <- datawine
+vectorDis <- datawine4$alcohol
+minAlc <- min(vectorDis)
+maxAlc <- max(vectorDis)
+w <- (maxAlc -minAlc)/T
+indiceInt1 <- vectorDis >= minAlc & vectorDis < minAlc + w
+indiceInt2 <- vectorDis >= minAlc + w & vectorDis < minAlc + 2*w
+indiceInt3 <- vectorDis >= minAlc + 2*w & vectorDis <= minAlc + 3*w
+vectorDis[indiceInt1] <- 1
+vectorDis[indiceInt2] <- 2
+vectorDis[indiceInt3] <- 3
+summary(vectorDis)
+vectorDis <- factor(vectorDis)
+summary(vectorDis)
 
 
 
